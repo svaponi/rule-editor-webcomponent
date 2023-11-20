@@ -1,7 +1,16 @@
 import {ConditionOrBoolComponentV2} from './ConditionOrBoolComponentV2';
-import React, {useEffect, useState} from 'react';
-import {FormFieldTrigger, FormFieldTriggerAction} from '../model/Triggers';
+import React, {ChangeEvent, useEffect, useState} from 'react';
+import {
+  FormFieldTrigger,
+  FormFieldTriggerAction,
+  FormFieldTriggerActionType,
+  FormFieldTriggerActionTypes,
+  isFormFieldTriggerActionEval,
+  isFormFieldTriggerActionSetTimestamp,
+  isFormFieldTriggerActionSetValue,
+} from '../model/Triggers';
 import {FormFieldConditionOrBool} from '../model/Condition';
+import {SingleValueComponent} from './SingleValueComponent';
 
 export function TriggersComponentV2({
   triggers,
@@ -95,20 +104,20 @@ function TriggerActionComponent({
   action: FormFieldTriggerAction;
   onChange: (condition: FormFieldTriggerAction | null) => void;
 }) {
-  const [thisActionAsString, setThisActionAsString] = useState<string>(JSON.stringify(action));
+  const [thisAction, setThisAction] = useState<FormFieldTriggerAction>(action);
   const [editing, setEditing] = useState<boolean>(propsEditing ?? false);
 
   useEffect(() => {
-    setThisActionAsString(JSON.stringify(action));
+    setThisAction(action);
   }, [action]);
 
   function handleSave() {
-    onChange(JSON.parse(thisActionAsString));
+    onChange(thisAction);
     setEditing(false);
   }
 
   function handleCancel() {
-    setThisActionAsString(JSON.stringify(action));
+    setThisAction(action);
     setEditing(false);
   }
 
@@ -118,19 +127,63 @@ function TriggerActionComponent({
     }
   }
 
+  function setType(type: FormFieldTriggerActionType) {
+    console.log('setType', type);
+    if (type === 'eval') setThisAction({type, expression: ''});
+    else if (type === 'set_value') setThisAction({type, value: ''});
+    else if (type === 'set_timestamp') setThisAction({type});
+    else throw Error(`unknown type ${type}`);
+  }
+
+  function setValue(value: any) {
+    console.log('setValue', value);
+    setThisAction({type: 'set_value', value});
+  }
+
+  function setExpression(expression: string) {
+    console.log('setExpression', expression);
+    setThisAction({type: 'eval', expression});
+  }
+
+  const TypeOptions = FormFieldTriggerActionTypes.map((v) => <option value={v}>{v}</option>);
+  const Type = (
+    <select name={'type'} value={thisAction.type} onChange={(e) => setType(e.target.value)}>
+      <option></option>
+      {TypeOptions}
+    </select>
+  );
+
   return (
     <div className="containerized action-container">
       {editing ? (
         <>
-          <span className={'form-container'}>
-            <textarea value={thisActionAsString} onChange={(e) => setThisActionAsString(e.target.value)} />
-          </span>
+          {isFormFieldTriggerActionEval(thisAction) ? (
+            <span className={'form-container'}>
+              type:{Type} expression:
+              <textarea
+                rows={2}
+                style={{width: '60%', display: 'inline-table'}}
+                name={'expression'}
+                value={thisAction.expression}
+                onChange={(e) => setExpression(e.target.value)}
+              />
+            </span>
+          ) : isFormFieldTriggerActionSetValue(thisAction) ? (
+            <span className={'form-container'}>
+              type:{Type} value:
+              <SingleValueComponent value={thisAction.value} setValue={setValue} />
+            </span>
+          ) : isFormFieldTriggerActionSetTimestamp(thisAction) ? (
+            <span className={'form-container'}>type:{Type}</span>
+          ) : (
+            <span className={'form-container'}>unknown action {JSON.stringify(thisAction)}</span>
+          )}
           <button onClick={() => handleCancel()}>cancel</button>
           <button onClick={() => handleSave()}>save</button>
         </>
       ) : (
         <>
-          <span className={'json-container'}>{thisActionAsString}</span>
+          <span className={'json-container'}>{JSON.stringify(thisAction)}</span>
           <button onClick={() => setEditing(true)}>edit</button>
           <button onClick={() => handleDelete()}>delete</button>
         </>

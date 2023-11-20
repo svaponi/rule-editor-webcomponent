@@ -14,6 +14,7 @@ import {
 } from '../model/Condition';
 
 import React, {ChangeEvent, useEffect, useState} from 'react';
+import {SingleValueComponent} from './SingleValueComponent';
 
 export function ConditionOrBoolComponentV2({
   editing,
@@ -133,61 +134,6 @@ function NewConditionComponent({onChange}: {onChange: (condition: FormFieldCondi
   );
 }
 
-const SingleConditionValueTypes = ['string', 'number', 'boolean', 'null', 'undefined'];
-type SingleConditionValueType = (typeof SingleConditionValueTypes)[number];
-
-function inferSingleConditionValueType(value: any): SingleConditionValueType {
-  if (value === null) return 'null';
-  if (value === undefined) return 'undefined';
-  const typeofValue = typeof value;
-  switch (typeofValue) {
-    case 'number':
-    case 'boolean':
-    case 'string':
-      return typeofValue;
-    default:
-      return 'string';
-  }
-}
-
-function SingleConditionValueComponent({value, setValue}: {value: any; setValue: (value: any) => void}) {
-  const [type, setType] = useState<SingleConditionValueType>(inferSingleConditionValueType(value));
-
-  console.log('SingleConditionValue is rendered', value, type);
-
-  useEffect(() => {
-    if (type === 'number') {
-      let num = Number(value);
-      setValue(isNaN(num) ? 0 : num);
-    } else if (type === 'boolean') {
-      setValue(!!value);
-    } else if (type === 'string') {
-      setValue(value.toString());
-    } else if (type === 'null') {
-      setValue(null);
-    } else if (type === 'undefined') {
-      setValue(undefined);
-    }
-  }, [value, type]);
-
-  return (
-    <span>
-      <select name={'operator'} value={type} onChange={(e) => setType(e.target.value)}>
-        {SingleConditionValueTypes.map((vt) => (
-          <option value={vt}>{vt}</option>
-        ))}
-      </select>
-      {type === 'number' ? (
-        <input type={'number'} name={'value'} value={Number(value)} onChange={(e) => setValue(e.target.value)} />
-      ) : type === 'boolean' ? (
-        <input type={'checkbox'} name={'value'} checked={!!value} onChange={(e) => setValue(e.target.checked)} />
-      ) : type === 'string' ? (
-        <input type={'text'} name={'value'} value={value} onChange={(e) => setValue(e.target.value)} />
-      ) : null}
-    </span>
-  );
-}
-
 function SingleConditionComponent({
   onChange,
   condition,
@@ -254,7 +200,7 @@ function SingleConditionComponent({
       {OperatorOptions}
     </select>
   );
-  const Value = <SingleConditionValueComponent value={thisSimpleCondition.value} setValue={setValue} />;
+  const Value = <SingleValueComponent value={thisSimpleCondition.value} setValue={setValue} />;
   const Reverse = (
     <input type={'checkbox'} name={'reverse'} checked={thisSimpleCondition.reverse} onChange={handleCheck} />
   );

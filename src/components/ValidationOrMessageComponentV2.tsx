@@ -1,7 +1,7 @@
 import {FormFieldValidation, FormFieldValidationOrMessage, isValidation} from '../model/Validation';
 import {ConditionOrBoolComponentV2} from './ConditionOrBoolComponentV2';
 import React, {useEffect, useState} from 'react';
-import {FormFieldConditionOrBool} from '../model/Condition';
+import {FormFieldConditionOrBool, FormFieldMultipleConditionOperators} from '../model/Condition';
 
 export function ValidationsComponentV2({
   validations,
@@ -140,7 +140,11 @@ function MessageComponent({
       {editing ? (
         <>
           <span className={'form-container'}>
-            <textarea value={thisMessage} onChange={(e) => setThisMessage(e.target.value)} />
+            <textarea
+              style={{width: '60%', display: 'inline-table'}}
+              value={thisMessage}
+              onChange={(e) => setThisMessage(e.target.value)}
+            />
           </span>
           <button onClick={() => handleCancel()}>cancel</button>
           <button onClick={() => handleSave()}>save</button>
