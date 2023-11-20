@@ -6,7 +6,8 @@ export interface FormFieldTrigger {
 export interface FormFieldTriggerActionBase {
     type: FormFieldTriggerActionType;
 }
-export type FormFieldTriggerActionType = 'eval' | 'set_value' | 'set_timestamp';
+export declare const FormFieldTriggerActionTypes: string[];
+export type FormFieldTriggerActionType = (typeof FormFieldTriggerActionTypes)[number];
 export interface FormFieldTriggerActionEval extends FormFieldTriggerActionBase {
     type: 'eval';
     expression: string;
@@ -19,3 +20,6 @@ export interface FormFieldTriggerActionSetTimestamp extends FormFieldTriggerActi
     type: 'set_timestamp';
 }
 export type FormFieldTriggerAction = FormFieldTriggerActionEval | FormFieldTriggerActionSetValue | FormFieldTriggerActionSetTimestamp;
+export declare function isFormFieldTriggerActionEval(action: FormFieldTriggerAction): action is FormFieldTriggerActionEval;
+export declare function isFormFieldTriggerActionSetValue(action: FormFieldTriggerAction): action is FormFieldTriggerActionSetValue;
+export declare function isFormFieldTriggerActionSetTimestamp(action: FormFieldTriggerAction): action is FormFieldTriggerActionSetTimestamp;

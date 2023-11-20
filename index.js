@@ -623,6 +623,22 @@ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 ***************************************************************************** */
+/* global Reflect, Promise, SuppressedError, Symbol */
+
+var extendStatics = function(d, b) {
+  extendStatics = Object.setPrototypeOf ||
+      ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+      function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+  return extendStatics(d, b);
+};
+
+function __extends(d, b) {
+  if (typeof b !== "function" && b !== null)
+      throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+  extendStatics(d, b);
+  function __() { this.constructor = d; }
+  d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+}
 
 var __assign = function() {
   __assign = Object.assign || function __assign(t) {
@@ -708,6 +724,49 @@ function isValidMultipleCondition(condition) {
         Array.isArray(condition.value));
 }
 
+var SingleValueTypes = ['string', 'number', 'boolean', 'null', 'undefined'];
+function inferSingleConditionValueType(value) {
+    if (value === null)
+        return 'null';
+    if (value === undefined)
+        return 'undefined';
+    var typeofValue = typeof value;
+    switch (typeofValue) {
+        case 'number':
+        case 'boolean':
+        case 'string':
+            return typeofValue;
+        default:
+            return 'string';
+    }
+}
+function SingleValueComponent(_a) {
+    var value = _a.value, setValue = _a.setValue;
+    var _b = react.exports.useState(inferSingleConditionValueType(value)), type = _b[0], setType = _b[1];
+    console.log('SingleValueComponent is rendered', value, type);
+    react.exports.useEffect(function () {
+        if (type === 'number') {
+            var num = Number(value);
+            setValue(isNaN(num) ? 0 : num);
+        }
+        else if (type === 'boolean') {
+            setValue(!!value);
+        }
+        else if (type === 'string') {
+            setValue(value !== null && value !== void 0 ? value : '');
+        }
+        else if (type === 'null') {
+            setValue(null);
+        }
+        else if (type === 'undefined') {
+            setValue(undefined);
+        }
+    }, [value, type]);
+    return (React.createElement("span", null,
+        React.createElement("select", { name: 'operator', value: type, onChange: function (e) { return setType(e.target.value); } }, SingleValueTypes.map(function (vt) { return (React.createElement("option", { value: vt }, vt)); })),
+        type === 'number' ? (React.createElement("input", { type: 'number', name: 'value', value: Number(value), onChange: function (e) { return setValue(e.target.value); } })) : type === 'boolean' ? (React.createElement("input", { type: 'checkbox', name: 'value', checked: !!value, onChange: function (e) { return setValue(e.target.checked); } })) : type === 'string' ? (React.createElement("input", { type: 'text', name: 'value', value: value, onChange: function (e) { return setValue(e.target.value); } })) : null));
+}
+
 function ConditionOrBoolComponentV2(_a) {
     var editing = _a.editing, onChange = _a.onChange, thisCondition = _a.condition;
     console.log('ConditionOrBoolComponentV2 is rendered', { thisCondition: thisCondition });
@@ -772,48 +831,6 @@ function NewConditionComponent(_a) {
         React.createElement("select", { name: 'type', value: type, onChange: function (e) { return setType(e.target.value); } }, FormFieldConditionTypes.map(function (v) { return (React.createElement("option", { value: v }, v)); })),
         React.createElement("button", { onClick: function () { return handleConfirm(); } }, "confirm")));
 }
-var SingleConditionValueTypes = ['string', 'number', 'boolean', 'null', 'undefined'];
-function inferSingleConditionValueType(value) {
-    if (value === null)
-        return 'null';
-    if (value === undefined)
-        return 'undefined';
-    var typeofValue = typeof value;
-    switch (typeofValue) {
-        case 'number':
-        case 'boolean':
-        case 'string':
-            return typeofValue;
-        default:
-            return 'string';
-    }
-}
-function SingleConditionValueComponent(_a) {
-    var value = _a.value, setValue = _a.setValue;
-    var _b = react.exports.useState(inferSingleConditionValueType(value)), type = _b[0], setType = _b[1];
-    console.log('SingleConditionValue is rendered', value, type);
-    react.exports.useEffect(function () {
-        if (type === 'number') {
-            var num = Number(value);
-            setValue(isNaN(num) ? 0 : num);
-        }
-        else if (type === 'boolean') {
-            setValue(!!value);
-        }
-        else if (type === 'string') {
-            setValue(value.toString());
-        }
-        else if (type === 'null') {
-            setValue(null);
-        }
-        else if (type === 'undefined') {
-            setValue(undefined);
-        }
-    }, [value, type]);
-    return (React.createElement("span", null,
-        React.createElement("select", { name: 'operator', value: type, onChange: function (e) { return setType(e.target.value); } }, SingleConditionValueTypes.map(function (vt) { return (React.createElement("option", { value: vt }, vt)); })),
-        type === 'number' ? (React.createElement("input", { type: 'number', name: 'value', value: Number(value), onChange: function (e) { return setValue(e.target.value); } })) : type === 'boolean' ? (React.createElement("input", { type: 'checkbox', name: 'value', checked: !!value, onChange: function (e) { return setValue(e.target.checked); } })) : type === 'string' ? (React.createElement("input", { type: 'text', name: 'value', value: value, onChange: function (e) { return setValue(e.target.value); } })) : null));
-}
 function SingleConditionComponent(_a) {
     var onChange = _a.onChange, condition = _a.condition, propsEditing = _a.editing;
     var _b = react.exports.useState(condition), thisSimpleCondition = _b[0], setThisSimpleCondition = _b[1];
@@ -859,7 +876,7 @@ function SingleConditionComponent(_a) {
     var Operator = (React.createElement("select", { name: 'operator', value: thisSimpleCondition.operator, onChange: handleChange },
         React.createElement("option", null),
         OperatorOptions));
-    var Value = React.createElement(SingleConditionValueComponent, { value: thisSimpleCondition.value, setValue: setValue });
+    var Value = React.createElement(SingleValueComponent, { value: thisSimpleCondition.value, setValue: setValue });
     var Reverse = (React.createElement("input", { type: 'checkbox', name: 'reverse', checked: thisSimpleCondition.reverse, onChange: handleCheck }));
     var isValid = isValidSingleCondition(thisSimpleCondition);
     var isValidClass = isValid ? 'valid' : 'invalid';
@@ -1046,12 +1063,23 @@ function MessageComponent(_a) {
     }
     return (React.createElement("div", { className: "containerized message-container" }, editing ? (React.createElement(React.Fragment, null,
         React.createElement("span", { className: 'form-container' },
-            React.createElement("textarea", { value: thisMessage, onChange: function (e) { return setThisMessage(e.target.value); } })),
+            React.createElement("textarea", { style: { width: '60%', display: 'inline-table' }, value: thisMessage, onChange: function (e) { return setThisMessage(e.target.value); } })),
         React.createElement("button", { onClick: function () { return handleCancel(); } }, "cancel"),
         React.createElement("button", { onClick: function () { return handleSave(); } }, "save"))) : (React.createElement(React.Fragment, null,
         React.createElement("span", { className: 'json-container' }, JSON.stringify(thisMessage)),
         React.createElement("button", { onClick: function () { return setEditing(true); } }, "edit"),
         React.createElement("button", { onClick: function () { return handleDelete(); } }, "delete")))));
+}
+
+var FormFieldTriggerActionTypes = ['eval', 'set_value', 'set_timestamp'];
+function isFormFieldTriggerActionEval(action) {
+    return (action === null || action === void 0 ? void 0 : action.type) && typeof (action === null || action === void 0 ? void 0 : action.type) === 'string' && action.type === 'eval';
+}
+function isFormFieldTriggerActionSetValue(action) {
+    return (action === null || action === void 0 ? void 0 : action.type) && typeof (action === null || action === void 0 ? void 0 : action.type) === 'string' && action.type === 'set_value';
+}
+function isFormFieldTriggerActionSetTimestamp(action) {
+    return (action === null || action === void 0 ? void 0 : action.type) && typeof (action === null || action === void 0 ? void 0 : action.type) === 'string' && action.type === 'set_timestamp';
 }
 
 function TriggersComponentV2(_a) {
@@ -1105,17 +1133,17 @@ function TriggerComponent(_a) {
 }
 function TriggerActionComponent(_a) {
     var action = _a.action, onChange = _a.onChange, propsEditing = _a.editing;
-    var _b = react.exports.useState(JSON.stringify(action)), thisActionAsString = _b[0], setThisActionAsString = _b[1];
+    var _b = react.exports.useState(action), thisAction = _b[0], setThisAction = _b[1];
     var _c = react.exports.useState(propsEditing !== null && propsEditing !== void 0 ? propsEditing : false), editing = _c[0], setEditing = _c[1];
     react.exports.useEffect(function () {
-        setThisActionAsString(JSON.stringify(action));
+        setThisAction(action);
     }, [action]);
     function handleSave() {
-        onChange(JSON.parse(thisActionAsString));
+        onChange(thisAction);
         setEditing(false);
     }
     function handleCancel() {
-        setThisActionAsString(JSON.stringify(action));
+        setThisAction(action);
         setEditing(false);
     }
     function handleDelete() {
@@ -1123,15 +1151,68 @@ function TriggerActionComponent(_a) {
             onChange(null);
         }
     }
+    function setType(type) {
+        console.log('setType', type);
+        if (type === 'eval')
+            setThisAction({ type: type, expression: '' });
+        else if (type === 'set_value')
+            setThisAction({ type: type, value: '' });
+        else if (type === 'set_timestamp')
+            setThisAction({ type: type });
+        else
+            throw Error("unknown type ".concat(type));
+    }
+    function setValue(value) {
+        console.log('setValue', value);
+        setThisAction({ type: 'set_value', value: value });
+    }
+    function setExpression(expression) {
+        console.log('setExpression', expression);
+        setThisAction({ type: 'eval', expression: expression });
+    }
+    var TypeOptions = FormFieldTriggerActionTypes.map(function (v) { return React.createElement("option", { value: v }, v); });
+    var Type = (React.createElement("select", { name: 'type', value: thisAction.type, onChange: function (e) { return setType(e.target.value); } },
+        React.createElement("option", null),
+        TypeOptions));
     return (React.createElement("div", { className: "containerized action-container" }, editing ? (React.createElement(React.Fragment, null,
-        React.createElement("span", { className: 'form-container' },
-            React.createElement("textarea", { value: thisActionAsString, onChange: function (e) { return setThisActionAsString(e.target.value); } })),
+        isFormFieldTriggerActionEval(thisAction) ? (React.createElement("span", { className: 'form-container' },
+            "type:",
+            Type,
+            " expression:",
+            React.createElement("textarea", { rows: 2, style: { width: '60%', display: 'inline-table' }, name: 'expression', value: thisAction.expression, onChange: function (e) { return setExpression(e.target.value); } }))) : isFormFieldTriggerActionSetValue(thisAction) ? (React.createElement("span", { className: 'form-container' },
+            "type:",
+            Type,
+            " value:",
+            React.createElement(SingleValueComponent, { value: thisAction.value, setValue: setValue }))) : isFormFieldTriggerActionSetTimestamp(thisAction) ? (React.createElement("span", { className: 'form-container' },
+            "type:",
+            Type)) : (React.createElement("span", { className: 'form-container' },
+            "unknown action ",
+            JSON.stringify(thisAction))),
         React.createElement("button", { onClick: function () { return handleCancel(); } }, "cancel"),
         React.createElement("button", { onClick: function () { return handleSave(); } }, "save"))) : (React.createElement(React.Fragment, null,
-        React.createElement("span", { className: 'json-container' }, thisActionAsString),
+        React.createElement("span", { className: 'json-container' }, JSON.stringify(thisAction)),
         React.createElement("button", { onClick: function () { return setEditing(true); } }, "edit"),
         React.createElement("button", { onClick: function () { return handleDelete(); } }, "delete")))));
 }
+
+var ErrorBoundary = /** @class */ (function (_super) {
+    __extends(ErrorBoundary, _super);
+    function ErrorBoundary(props) {
+        var _this = _super.call(this, props) || this;
+        _this.state = { hasError: false };
+        return _this;
+    }
+    ErrorBoundary.getDerivedStateFromError = function (error) {
+        return { hasError: true };
+    };
+    ErrorBoundary.prototype.render = function () {
+        if (this.state.hasError) {
+            return React.createElement("pre", null, "Editor panic!");
+        }
+        return this.props.children;
+    };
+    return ErrorBoundary;
+}(React.Component));
 
 function RuleEditor(_a) {
     var propsRuleId = _a.ruleId, propsType = _a.type, propsRule = _a.rule;
@@ -1178,11 +1259,13 @@ function RuleEditor(_a) {
             throw Error('invalid type ' + propsType);
     }, [propsType]);
     react.exports.useEffect(function () {
-        if (ruleId) {
-            window.dispatchEvent(new CustomEvent("RuleEditor".concat(ruleId, "-RuleChangeEvent"), { detail: JSON.stringify(rule) }));
-        }
-        else {
-            window.dispatchEvent(new CustomEvent('RuleEditor-RuleChangeEvent', { detail: JSON.stringify(rule) }));
+        if (rule) {
+            if (ruleId) {
+                window.dispatchEvent(new CustomEvent("RuleEditor-".concat(ruleId, "-RuleChangeEvent"), { detail: JSON.stringify(rule) }));
+            }
+            else {
+                window.dispatchEvent(new CustomEvent('RuleEditor-RuleChangeEvent', { detail: JSON.stringify(rule) }));
+            }
         }
     }, [rule, ruleId]);
     return (React.createElement("div", { className: "rule-editor", id: 'rule-editor-' + ruleId },
@@ -1192,7 +1275,8 @@ function RuleEditor(_a) {
             React.createElement("code", null, "undefined"))) : rule === null ? (React.createElement("span", null,
             React.createElement("code", null, "null"))) : type === undefined || type === null ? (React.createElement("span", null,
             "invalid ",
-            React.createElement("code", null, "type"))) : (React.createElement(RuleEditorInternal, { rule: rule, type: type, setRule: setRule }))));
+            React.createElement("code", null, "type"))) : (React.createElement(ErrorBoundary, null,
+            React.createElement(RuleEditorInternal, { rule: rule, type: type, setRule: setRule })))));
 }
 function RuleEditorInternal(_a) {
     var rule = _a.rule, type = _a.type, setRule = _a.setRule;

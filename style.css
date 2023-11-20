@@ -12,6 +12,7 @@
 }
 
 select,
+textarea,
 input {
     margin: 2px;
     padding: 2px 4px;
@@ -95,7 +96,7 @@ button {
 }
 
 .unknown:before {
-    content: 'unknown';
+    content: 'unknown ';
     font-family: monospace;
     color: var(--warning);
 }
