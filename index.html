@@ -1,0 +1,96 @@
+<html>
+<head>
+    <title>Showcase of RuleEditor as WebComponent</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<style>
+    body {
+        margin: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: #eee;
+        padding: 1em;
+        box-sizing: border-box;
+    }
+
+    .rule-editor-container {
+        background-color: white;
+        border: 3px solid black;
+        margin: 1em 0;
+        padding: 1em;
+    }
+
+    .output {
+        border: 1px solid black;
+        padding: 1em;
+    }
+
+    .rule-editor {
+        border: 1px solid black;
+        padding: 1em;
+    }
+</style>
+<body>
+<script src="./index.es.js"></script>
+<h1>Example of RuleEditor as WebComponent</h1>
+<div class="rule-editor-container">
+    <x-rule-editor type='hidden' rule='true'/>
+</div>
+<div class="rule-editor-container">
+    <x-rule-editor type='validations'
+                   rule='[{"message":"The Operation name should not start or end with a blank space. Only alphanumeric characters, spaces, underscores, parentheses, and hyphens are accepted.","condition":{"type":"single_condition","field_name":"name","operator":"regex","value":"^[A-Za-z0-9-(]([A-Za-z0-9\\s-()_]*[A-Za-z0-9-()_])?$"}}]'/>
+</div>
+<div class="rule-editor-container">
+    <x-rule-editor type='triggers'
+                   rule='[{"action":{"type":"eval","expression":"(values.health_current_gross_premium || 0) - (values.health_current_subsidy || 0)"},"condition":{"type":"multiple_condition","operator":"and","value":[{"type":"single_condition","field_name":"nob","operator":"eval","value":"true"},{"type":"multiple_condition","operator":"or","value":[{"type":"single_condition","field_name":"health_current_gross_premium","operator":"greater_than_or_equal","value":0},{"type":"single_condition","field_name":"health_current_subsidy","operator":"greater_than_or_equal","value":0}]}]}}]'/>
+</div>
+<div class="rule-editor-container">
+    <x-rule-editor type='required'
+                   rule='{"message":"required","condition":{"type":"single_condition","operator":"equal","field_name":"enable_automaic_voicemail_drop","value":true}}'/>
+</div>
+<div class="rule-editor-container">
+    <x-rule-editor type='hidden'
+                   rule='{"type":"single_condition","operator":"equal","field_name":"action_type","value":"call_now","reverse":true}'/>
+</div>
+<div class="rule-editor-container">
+    <x-rule-editor type='hidden'
+                   rule='{"type":"multiple_condition","operator":"and","value":[{"type":"single_condition","field_name":"nob","operator":"eval","value":"true"},{"type":"multiple_condition","operator":"or","value":[{"type":"single_condition","field_name":"health_current_gross_premium","operator":"greater_than_or_equal","value":0},{"type":"single_condition","field_name":"health_current_subsidy","operator":"greater_than_or_equal","value":0}]}]}'/>
+</div>
+<div class="rule-editor-container">
+    <x-rule-editor type='hidden'
+                   rule='{"type":"multiple_condition","operator":"and","value":[{"type":"single_condition","field_name":"nob","operator":"eval","value":"true"},{"type":"single_condition","field_name":"health_current_gross_premium","operator":"greater_than_or_equal","value":0}]}'/>
+</div>
+
+<script>
+    const components = document.querySelectorAll("x-rule-editor")
+    components.forEach((c, index) => {
+        console.log("Setup", c, index)
+        try {
+            c.type = c.getAttribute("type")
+            c.rule = JSON.parse(c.getAttribute("rule"))
+            c.ruleId = index
+        } catch (e) {
+            console.error(e)
+        }
+        {
+            const h3 = document.createElement("h3")
+            h3.innerHTML = "The <code>x-rule-editor</code> component"
+            c.parentElement.prepend(h3)
+        }
+        {
+            const pre = document.createElement("pre")
+            pre.className = "output"
+            c.parentElement.prepend(pre)
+            window.addEventListener(`RuleEditor${index}-RuleChangeEvent`, (e) => {
+                pre.innerText = JSON.stringify(JSON.parse(e.detail), null, 2)
+            })
+        }
+        {
+            const h3 = document.createElement("h3")
+            h3.innerText = "Event emitted by the component"
+            c.parentElement.prepend(h3)
+        }
+    })
+</script>
+</body>
+</html>

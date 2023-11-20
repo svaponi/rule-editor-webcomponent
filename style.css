@@ -1,0 +1,108 @@
+:root {
+    --error: crimson;
+    --success: limegreen;
+    --info: deepskyblue;
+    --warning: orange;
+
+    --validation: deeppink;
+    --validation-message: purple;
+    --trigger: deepskyblue;
+    --trigger-action: orange;
+    --condition: limegreen;
+}
+
+select,
+input {
+    margin: 2px;
+    padding: 2px 4px;
+}
+
+button {
+    margin: 2px;
+    padding: 2px 8px;
+}
+
+.rule-container {
+    padding: 1em;
+    border: 1px solid #eeeeee;
+}
+
+.containerized {
+    margin: 1em 0;
+    padding: 0.5em 0.5em 0.2em 2em;
+    border-left: 3px solid #eeeeee;
+}
+
+.validation-container {
+    border-left: 3px solid var(--validation);
+}
+
+.message-container {
+    border-left: 3px solid var(--validation-message);
+}
+
+.trigger-container {
+    border-left: 3px solid var(--trigger);
+}
+
+.action-container {
+    border-left: 3px solid var(--trigger-action);
+}
+
+.condition-container {
+    border-left: 3px solid var(--condition);
+}
+
+.condition-container.single-condition {
+    border-left: 3px solid lightgreen;
+}
+
+.title {
+    font-family: monospace;
+}
+
+.message-title {
+    color: var(--validation-message);
+}
+
+.action-title {
+    color: var(--trigger-action);
+}
+
+.condition-title {
+    color: var(--condition);
+}
+
+
+.valid {
+    background-color: white;
+}
+
+.invalid {
+    border-left: 3px solid var(--error);
+    background-color: color-mix(in srgb, var(--error) 4%, transparent);
+}
+
+.invalid:before {
+    content: 'invalid ';
+    font-family: monospace;
+    color: var(--error);
+}
+
+.unknown {
+    border-left: 3px solid var(--warning);
+    background-color: color-mix(in srgb, var(--warning) 4%, transparent);
+}
+
+.unknown:before {
+    content: 'unknown';
+    font-family: monospace;
+    color: var(--warning);
+}
+
+.json-container {
+    font-family: monospace;
+    color: #333;
+    margin: 1em 1em 1em 0;
+}
+
