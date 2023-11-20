@@ -32,7 +32,25 @@
 </style>
 <body>
 <script src="./index.es.js"></script>
-<h1>Example of RuleEditor as WebComponent</h1>
+<h1>Playground</h1>
+
+<div class="rule-editor-container" id="demo">
+    <h3>Copy-paste your rule in the textarea below. Use the RuleEditor to edit the rule.</h3>
+    <label for="demo-type">type</label>
+    <select id="demo-type">
+        <option></option>
+        <option value="hidden">hidden</option>
+        <option value="disabled">disabled</option>
+        <option value="required">required</option>
+        <option value="validations">validations</option>
+        <option value="triggers">triggers</option>
+    </select>
+    <textarea id="demo-textarea" rows="10" style="width:100%"></textarea>
+    <h3>The <code>x-rule-editor</code> component</h3>
+</div>
+
+
+<h1>Examples of RuleEditor as WebComponent</h1>
 <div class="rule-editor-container">
     <x-rule-editor type='hidden' rule='true'/>
 </div>
@@ -78,19 +96,43 @@
             c.parentElement.prepend(h3)
         }
         {
+            const h3 = document.createElement("h3")
+            h3.innerText = "Event emitted by the component"
+            c.parentElement.appendChild(h3)
+        }
+        {
             const pre = document.createElement("pre")
             pre.className = "output"
-            c.parentElement.prepend(pre)
-            window.addEventListener(`RuleEditor${index}-RuleChangeEvent`, (e) => {
+            c.parentElement.appendChild(pre)
+            window.addEventListener(`RuleEditor-${index}-RuleChangeEvent`, (e) => {
                 pre.innerText = JSON.stringify(JSON.parse(e.detail), null, 2)
             })
         }
-        {
-            const h3 = document.createElement("h3")
-            h3.innerText = "Event emitted by the component"
-            c.parentElement.prepend(h3)
-        }
     })
 </script>
+
+<script>
+    const editor = document.createElement("x-rule-editor")
+    editor.ruleId = "Demo"
+    document.getElementById("demo").appendChild(editor)
+
+    const type = document.getElementById("demo-type")
+    editor.type = type.value
+    type.addEventListener("change", (event) => {
+        editor.type = event.target.value
+    })
+
+    const textarea = document.getElementById("demo-textarea")
+    textarea.innerText = ""
+    textarea.addEventListener("change", (event) => {
+        editor.rule = JSON.parse(textarea.value)
+        textarea.rows = textarea.value.split("\n").length
+    })
+
+    window.addEventListener(`RuleEditor-Demo-RuleChangeEvent`, (e) => {
+        textarea.value = JSON.stringify(JSON.parse(e.detail), null, 2)
+    })
+</script>
+
 </body>
 </html>

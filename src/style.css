@@ -96,7 +96,7 @@ button {
 }
 
 .unknown:before {
-    content: 'unknown';
+    content: 'unknown ';
     font-family: monospace;
     color: var(--warning);
 }

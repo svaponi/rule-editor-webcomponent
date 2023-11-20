@@ -7,6 +7,7 @@ import {FormFieldValidationOrMessage} from './model/Validation';
 import {FormFieldTrigger} from './model/Triggers';
 import {Rule, RuleType} from './model/Rule';
 import './style.css';
+import {ErrorBoundary} from './components/ErrorBoundary';
 
 interface Props {
   ruleId: unknown;
@@ -46,10 +47,12 @@ export default function RuleEditor({ruleId: propsRuleId, type: propsType, rule: 
   }, [propsType]);
 
   useEffect(() => {
-    if (ruleId) {
-      window.dispatchEvent(new CustomEvent(`RuleEditor${ruleId}-RuleChangeEvent`, {detail: JSON.stringify(rule)}));
-    } else {
-      window.dispatchEvent(new CustomEvent('RuleEditor-RuleChangeEvent', {detail: JSON.stringify(rule)}));
+    if (rule) {
+      if (ruleId) {
+        window.dispatchEvent(new CustomEvent(`RuleEditor-${ruleId}-RuleChangeEvent`, {detail: JSON.stringify(rule)}));
+      } else {
+        window.dispatchEvent(new CustomEvent('RuleEditor-RuleChangeEvent', {detail: JSON.stringify(rule)}));
+      }
     }
   }, [rule, ruleId]);
 
@@ -71,7 +74,9 @@ export default function RuleEditor({ruleId: propsRuleId, type: propsType, rule: 
           invalid <code>type</code>
         </span>
       ) : (
-        <RuleEditorInternal rule={rule} type={type} setRule={setRule} />
+        <ErrorBoundary>
+          <RuleEditorInternal rule={rule} type={type} setRule={setRule} />
+        </ErrorBoundary>
       )}
     </div>
   );
